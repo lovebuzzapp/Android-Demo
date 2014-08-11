@@ -6,12 +6,15 @@ import java.util.Random;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -23,8 +26,8 @@ public class MainActivity extends Activity {
   private static final String LISTENING_MESSAGE_ON = "Listening for Potential Matches...";
   private static final String LISTENING_MESSAGE_OFF = "Listening turned OFF";
 
-  private List<String> myInterests = new ArrayList<String>();
   private List<String> matchInterests = new ArrayList<String>();
+  private List<Drawable> matchPhotos = new ArrayList<Drawable>();
 
   private ReschedulableTimer proximityAlertTimer = new ReschedulableTimer();
 
@@ -47,9 +50,24 @@ public class MainActivity extends Activity {
     });
 
     matchInterests = new ArrayList<String>();
-    matchInterests.add("Activism");
     matchInterests.add("Nature");
+    matchInterests.add("Scuba");
+    matchInterests.add("Zumba");
+    matchInterests.add("Belly Dancing");
+    matchInterests.add("Feminism");
+    matchInterests.add("Knitting");
     matchInterests.add("Puppies");
+    matchInterests.add("Whiskey");
+    matchInterests.add("Bacon");
+    matchInterests.add("Beer");
+    matchInterests.add("Recycling");
+    matchInterests.add("Karl Marx");
+
+    Resources res = getResources();
+    matchPhotos.add(res.getDrawable(R.drawable.photo0));
+    matchPhotos.add(res.getDrawable(R.drawable.photo1));
+    matchPhotos.add(res.getDrawable(R.drawable.photo2));
+    matchPhotos.add(res.getDrawable(R.drawable.photo3));
   }
 
   @Override
@@ -57,6 +75,7 @@ public class MainActivity extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     init();
+    this.setTitle(R.string.app_name);
     proximityAlertTimer.scheduleTimer(proximityAlertRunnable, delayInMillis);
   }
 
@@ -79,17 +98,19 @@ public class MainActivity extends Activity {
     return super.onOptionsItemSelected(item);
   }
 
-  private int getRandomInterestIndex() {
-    int high = matchInterests.size();
+  private int getRandomInterestIndex(int high) {
     Random r = new Random();
     return r.nextInt(high);
   }
 
   private void notifyAboutMatch() {
-    String notificationMessage = "Someone within \n";
-    notificationMessage += "30 feet \n";
+
+    ImageView iv = (ImageView) this.findViewById(R.id.imageView);
+    iv.setImageDrawable(matchPhotos.get(getRandomInterestIndex(matchPhotos.size())));
+    
+    String notificationMessage = "Someone within 50 feet \n";
     notificationMessage += "also likes \n";
-    notificationMessage += matchInterests.get(getRandomInterestIndex());
+    notificationMessage += matchInterests.get(getRandomInterestIndex(matchInterests.size()));
 
     TextView noticeText = (TextView) this.findViewById(R.id.noticeText);
     noticeText.setText(notificationMessage);
@@ -108,7 +129,10 @@ public class MainActivity extends Activity {
 
   private void clearAlert() {
     proximityAlertTimer.cancel();
-    
+
+    ImageView iv = (ImageView) this.findViewById(R.id.imageView);
+    iv.setImageDrawable(null);
+
     Button dismissButton = (Button) this.findViewById(R.id.dismissButton);
     dismissButton.setVisibility(Button.INVISIBLE);
 
@@ -133,7 +157,7 @@ public class MainActivity extends Activity {
     if (toggleButton.isChecked()) {
       proximityAlertTimer.scheduleTimer(proximityAlertRunnable, delayInMillis);
     } else {
-      proximityAlertTimer.cancel();
+      clearAlert();
     }
     setListeningStateMessage();
   }
